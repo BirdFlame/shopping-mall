@@ -66,27 +66,33 @@
         currentType: 'pop',
         isShowBackTop: false,
         tabOffsetTop:0,
-        isTabFixed:false
+        isTabFixed:false,
+        saveY:0
       }
+    },
+    activated(){
+      this.$refs.scroll.scrollTo(0,this.saveY,0)
+      this.$refs.scroll.refresh()
+    },
+    deactivated(){
+      this.saveY=this.$refs.scroll.getScrollY()
     },
     created() {
       this.getHomeMultidata()
       this.getHomeGoods('pop')
       this.getHomeGoods('new')
       this.getHomeGoods('sell')
-      //监听item中图片加载完成
+
 
     },
     mounted() {
-      const refresh = debounce(this.$refs.scroll.refresh, 500)
+      //监听item中图片加载完成
+      let refresh = debounce(this.$refs.scroll.refresh, 500)
       this.$bus.$on('itemImageLoad', () => {
         refresh()
       })
 
     },
-    // updated() {
-    //   console.log(this.$refs.tabControl.$el.offsetTop)
-    // },
     methods: {
       /*事件监听相关方法*/
       tabClick(index) {
@@ -130,6 +136,7 @@
         getHomeGoods(type, page).then(res => {
           this.goods[type].list.push(...res.data.data.list)
           this.goods[type].page += 1
+          //上拉加载更多
           this.$refs.scroll.finishPullUp()
         }).catch(err => {
           console.log(err)
